@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      signed:
+        description: 'Build signed release APK (requires signing secrets)'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   build:
@@ -31,49 +37,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Set up Expo environment
-        run: |
-          echo "EXPO_PUBLIC_GITHUB_CLIENT_ID=${{ vars.GITHUB_CLIENT_ID }}" >> .env
-
       - name: Prebuild Android project
         run: npx expo prebuild --platform android --clean
         env:
           EXPO_PUBLIC_GITHUB_CLIENT_ID: ${{ vars.GITHUB_CLIENT_ID }}
 
-      - name: Set up release signing (optional)
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      - name: Set up release signing
+        if: ${{ inputs.signed == 'true' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
           cat >> android/gradle.properties << EOF
           RELEASE_STORE_FILE=release.keystore
-          RELEASE_KEY_ALIAS=${{ secrets.KEY_ALIAS }}
-          RELEASE_STORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
-          RELEASE_KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
-          EOF
-
-      - name: Configure release signing in build.gradle
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-        run: |
-          sed -i '/buildTypes {/,/release {/{/release {/a\            signingConfig signingConfigs.release}' android/app/build.gradle || true
-          # Add signingConfigs block
-          cat >> android/app/build.gradle.patch << 'EOF'
-          Already configured via environment
+          RELEASE_KEY_ALIAS=$KEY_ALIAS
+          RELEASE_STORE_PASSWORD=$KEYSTORE_PASSWORD
+          RELEASE_KEY_PASSWORD=$KEY_PASSWORD
           EOF
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Build debug APK
-        if: ${{ secrets.KEYSTORE_BASE64 == '' }}
+      - name: Build release APK (signed)
+        if: ${{ inputs.signed == 'true' }}
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleRelease --no-daemon
         env:
           GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx3g"
 
-      - name: Build release APK
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      - name: Build debug APK
+        if: ${{ inputs.signed != 'true' }}
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleDebug --no-daemon
         env:
           GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs="-Xmx3g"
 
@@ -91,7 +89,7 @@ jobs:
           path: ${{ steps.find_apk.outputs.apk_path }}
           retention-days: 30
 
-      - name: Create GitHub Release (main branch only)
+      - name: Create GitHub Release (main branch push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
