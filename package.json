@@ -1,0 +1,43 @@
+{
+  "name": "gisthub",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "prebuild": "expo prebuild --platform android",
+    "build:debug": "npm run prebuild && cd android && ./gradlew assembleDebug",
+    "build:release": "npm run prebuild && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "expo": "~53.0.0",
+    "expo-router": "~5.0.0",
+    "react": "19.0.0",
+    "react-native": "0.79.2",
+    "react-native-paper": "^5.12.5",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "^4.10.0",
+    "react-native-gesture-handler": "~2.24.0",
+    "react-native-reanimated": "~3.17.4",
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "expo-clipboard": "~7.0.0",
+    "expo-file-system": "~18.0.9",
+    "expo-sharing": "~13.0.1",
+    "expo-document-picker": "~13.0.2",
+    "expo-secure-store": "~14.0.1",
+    "expo-status-bar": "~2.2.3",
+    "expo-font": "~13.3.1",
+    "expo-splash-screen": "~0.30.0",
+    "expo-linear-gradient": "~14.1.4",
+    "@expo/vector-icons": "^14.1.0",
+    "highlight.js": "^11.10.0",
+    "axios": "^1.9.0",
+    "date-fns": "^4.1.0",
+    "react-native-markdown-display": "^7.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@types/react": "~19.0.0",
+    "typescript": "^5.8.0"
+  }
+}

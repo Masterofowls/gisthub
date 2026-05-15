@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "GistHub",
+    "slug": "gisthub",
+    "version": "1.0.0",
+    "scheme": "gisthub",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6750A4"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6750A4"
+      },
+      "package": "com.gisthub.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "gisthub" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      ["expo-splash-screen", { "backgroundColor": "#6750A4", "image": "./assets/splash.png" }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
